@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Absen 1.3.9</title>
+  <title>Kaliber Absen</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
@@ -54,6 +54,36 @@
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- OVERLAY LIVE CAMERA (UNTUK PC & HP) -->
+    <div id="cameraLiveOverlay" class="fixed inset-0 bg-black z-[80] flex flex-col hidden-view">
+      <div class="p-4 flex justify-between items-center bg-gray-900 text-white shadow-md">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i data-lucide="camera" class="w-4 h-4"></i> Ambil Foto Absen</h3>
+        <button onclick="closeLiveCamera()" class="text-red-400 hover:text-red-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+      
+      <!-- Area Bingkai Kamera -->
+      <div class="flex-1 relative bg-black flex justify-center items-center overflow-hidden">
+        <!-- Tag video ini akan menampilkan feed kamera -->
+        <video id="liveVideo" autoplay playsinline class="w-full h-full object-cover transform scale-x-[-1]"></video>
+      </div>
+      
+      <!-- Area Tombol Kamera -->
+      <div class="p-6 bg-gray-900 flex justify-center items-center gap-8">
+        <!-- Tombol Putar Kamera (Depan/Belakang) -->
+        <button onclick="switchCamera()" class="p-3 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition shadow-lg">
+          <i data-lucide="refresh-ccw" class="w-5 h-5"></i>
+        </button>
+        
+        <!-- Tombol Jepret Foto -->
+        <button onclick="captureLivePhoto()" class="w-16 h-16 bg-white rounded-full border-4 border-gray-400 hover:bg-gray-300 transition shadow-[0_0_15px_rgba(255,255,255,0.5)] flex-shrink-0"></button>
+        
+        <div class="w-12"></div> <!-- Spacer penyeimbang tengah -->
+      </div>
+      
+      <!-- Canvas tersembunyi untuk menggambar foto -->
+      <canvas id="liveCanvas" class="hidden"></canvas>
+    </div>
 
   <!-- OVERLAY POPUP FOTO -->
     <div id="fotoOverlay" class="fixed inset-0 bg-black bg-opacity-80 z-[70] flex flex-col items-center justify-center hidden-view">
@@ -301,12 +331,16 @@
               <div class="mb-4">
                   <label class="block text-sm font-medium mb-1">Foto Selfie Masuk <span class="text-red-500">*</span></label>
                   <div class="bg-gray-100 p-2 rounded border border-gray-300 text-center">
-                      <!-- Input Kamera (native, tanpa permission iframe) -->
-                      <input type="file" id="cameraInputMasuk" accept="image/*" capture="user" class="hidden" onchange="handlePhotoCapture(this, 'previewMasuk', 'fotoBase64Masuk')">
-                      <canvas id="canvasMasuk" class="hidden"></canvas>
+                      <!-- Input file bawaan kita sembunyikan untuk fallback (opsional) -->
+                      <input type="file" id="cameraInputMasuk" accept="image/*" class="hidden" onchange="handlePhotoCapture(this, 'previewMasuk', 'fotoBase64Masuk')">
+                      
                       <img id="previewMasuk" class="w-full max-w-[150px] rounded mx-auto hidden mt-1 border border-gray-300" />
-                      <button type="button" onclick="document.getElementById('cameraInputMasuk').click()" class="bg-gray-200 text-gray-800 px-3 py-2 rounded font-bold text-xs w-full hover:bg-gray-300 mt-2 flex justify-center items-center gap-1 shadow-sm"><i data-lucide="camera" class="w-4 h-4"></i> Buka Kamera</button>
                       <input type="hidden" id="fotoBase64Masuk">
+                      
+                      <!-- Panggil openLiveCamera() alih-alih .click() -->
+                      <button type="button" onclick="openLiveCamera('previewMasuk', 'fotoBase64Masuk')" class="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-2 rounded font-bold text-xs w-full hover:bg-blue-200 mt-2 flex justify-center items-center gap-1 shadow-sm transition"><i data-lucide="camera" class="w-4 h-4"></i> Buka Kamera</button>
+                      
+                      <button type="button" onclick="document.getElementById('cameraInputMasuk').click()" class="mt-2 text-[10px] text-gray-500 hover:underline">Atau Pilih dari Galeri</button>
                   </div>
               </div>
 
@@ -321,17 +355,21 @@
               <div id="txtTanggalShift" class="text-sm font-bold text-gray-800">Memuat info shift...</div>
             </div>
             <p class="text-sm text-gray-600 mb-4">Pastikan Anda masih dalam radius puskesmas jika shift di dalam gedung.</p>
+
             <div class="mb-4">
                 <label class="block text-sm font-medium mb-1">Foto Selfie Pulang <span class="text-red-500">*</span></label>
                 <div class="bg-gray-100 p-2 rounded border border-gray-300 text-center">
-                    <!-- Input Kamera (native, tanpa permission iframe) -->
-                    <input type="file" id="cameraInputPulang" accept="image/*" capture="user" class="hidden" onchange="handlePhotoCapture(this, 'previewPulang', 'fotoBase64Pulang')">
-                    <canvas id="canvasPulang" class="hidden"></canvas>
+                    <input type="file" id="cameraInputPulang" accept="image/*" class="hidden" onchange="handlePhotoCapture(this, 'previewPulang', 'fotoBase64Pulang')">
+                    
                     <img id="previewPulang" class="w-full max-w-[150px] rounded mx-auto hidden mt-1 border border-gray-300" />
-                    <button type="button" onclick="document.getElementById('cameraInputPulang').click()" class="bg-gray-200 text-gray-800 px-3 py-2 rounded font-bold text-xs w-full hover:bg-gray-300 mt-2 flex justify-center items-center gap-1 shadow-sm"><i data-lucide="camera" class="w-4 h-4"></i> Buka Kamera</button>
                     <input type="hidden" id="fotoBase64Pulang">
+                    
+                    <button type="button" onclick="openLiveCamera('previewPulang', 'fotoBase64Pulang')" class="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-2 rounded font-bold text-xs w-full hover:bg-blue-200 mt-2 flex justify-center items-center gap-1 shadow-sm transition"><i data-lucide="camera" class="w-4 h-4"></i> Buka Kamera</button>
+                    
+                    <button type="button" onclick="document.getElementById('cameraInputPulang').click()" class="mt-2 text-[10px] text-gray-500 hover:underline">Atau Pilih dari Galeri</button>
                 </div>
             </div>
+
             <div id="wrapTombolPulang" class="flex flex-col gap-3">
               <button id="btnKonfirmasiPulang" onclick="submitKonfirmasiPulang()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold w-full hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">Konfirmasi Pulang</button>
               <button onclick="goToPulangDinas()" class="bg-orange-50 text-orange-600 border border-orange-200 px-4 py-2 rounded-lg font-bold w-full hover:bg-orange-100 transition">Pulang Alasan Dinas</button>
@@ -3348,6 +3386,104 @@
           }
        };
        reader.readAsBinaryString(file);
+    }
+
+    // ==========================================
+    // MODULE: LIVE CAMERA API (PC & MOBILE)
+    // ==========================================
+    let liveStream = null;
+    let currentFacingMode = 'user'; // 'user' = kamera depan (selfie), 'environment' = kamera belakang
+    let targetPreviewId = '';
+    let targetBase64Id = '';
+
+    function openLiveCamera(previewId, base64Id) {
+        targetPreviewId = previewId;
+        targetBase64Id = base64Id;
+        document.getElementById('cameraLiveOverlay').classList.remove('hidden-view');
+        startCameraStream();
+    }
+
+    function startCameraStream() {
+        // Hentikan stream yang sedang berjalan (jika ada) saat ganti kamera
+        if (liveStream) {
+            liveStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Meminta akses ke perangkat webcam/kamera
+        navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentFacingMode }
+        })
+        .then(stream => {
+            liveStream = stream;
+            const videoEl = document.getElementById('liveVideo');
+            videoEl.srcObject = stream;
+            
+            // Ubah efek cermin (mirror) hanya jika menggunakan kamera depan ('user')
+            if (currentFacingMode === 'user') {
+                videoEl.style.transform = "scaleX(-1)";
+            } else {
+                videoEl.style.transform = "none";
+            }
+        })
+        .catch(err => {
+            alert("Gagal mengakses kamera. Pastikan browser diizinkan mengakses kamera PC/HP Anda. \nError: " + err.message);
+            closeLiveCamera();
+        });
+    }
+
+    function closeLiveCamera() {
+        document.getElementById('cameraLiveOverlay').classList.add('hidden-view');
+        if (liveStream) {
+            liveStream.getTracks().forEach(track => track.stop());
+            liveStream = null;
+        }
+    }
+
+    function switchCamera() {
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+        startCameraStream();
+    }
+
+    function captureLivePhoto() {
+        if (!liveStream) return;
+        
+        let tid = toastManager.show("Memproses foto...");
+        const video = document.getElementById('liveVideo');
+        const canvas = document.getElementById('liveCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Batasi ukuran maksimal menjadi 600px untuk kompresi agar tidak berat saat disubmit
+        const MAX_WIDTH = 600;
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+        
+        if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Membalik (mirror) hasil jepretan jika pakai kamera depan agar teks/gambar tidak terbalik
+        if (currentFacingMode === 'user') {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        
+        // Gambar video frame ke dalam canvas
+        ctx.drawImage(video, 0, 0, width, height);
+
+        // Ekstrak sebagai base64 (Format JPEG, Kualitas 70%)
+        const base64Str = canvas.toDataURL('image/jpeg', 0.7);
+        
+        // Masukkan data ke UI preview form Absen
+        document.getElementById(targetPreviewId).src = base64Str;
+        document.getElementById(targetPreviewId).classList.remove('hidden');
+        document.getElementById(targetBase64Id).value = base64Str.split(',')[1]; // Buang URI Prefix
+
+        setTimeout(() => { toastManager.finish(tid, true, "Foto berhasil direkam!"); }, 500);
+        closeLiveCamera();
     }
 </script>
 </body>
