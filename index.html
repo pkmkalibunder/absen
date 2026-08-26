@@ -223,7 +223,7 @@
           </div>
         </div>
       </div>
-      <span class="letter-anim">A</span><span class="letter-anim">B</span><span class="letter-anim">S</span><span class="letter-anim">E</span><span class="letter-anim">N</span><span class="letter-anim">&nbsp;</span><span class="letter-anim">' '</span><span class="letter-anim">1</span><span class="letter-anim">.</span><span class="letter-anim">4</span><span class="letter-anim">.</span><span class="letter-anim">0</span>
+      <span class="letter-anim">A</span><span class="letter-anim">B</span><span class="letter-anim">S</span><span class="letter-anim">E</span><span class="letter-anim">N</span><span class="letter-anim">&nbsp;</span><span class="letter-anim">' '</span><span class="letter-anim">1</span><span class="letter-anim">.</span><span class="letter-anim">4</span><span class="letter-anim">.</span><span class="letter-anim">1</span>
             <p class="text-gray-500 text-sm">Masuk dengan NIP & Password</p>    
     </div>
 
@@ -1129,29 +1129,41 @@
     </div>
   </div>
 <script>
-    // ==========================================
-    // 1. KONFIGURASI API & FETCH WRAPPER
-    // ==========================================
-    // GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT WEB APP GAS ANDA
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyGsy6U3sXCEcZdKrncFvP5XW2gLC93WIZuuSLk2lLy6DbJnimBFKvU6nADSJ7Pf-SN/exec'; 
 
-    function gasApi(action, params = {}) {
-      return fetch(GAS_URL, {
-        method: 'POST',
-        redirect: 'follow', // Diperlukan karena Apps Script melakukan redirect pada POST
-        headers: {
-           'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({ action: action, ...params })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Jaringan bermasalah");
-        return res.json();
-      })
-      .catch(err => {
-         console.error("Fetch Error:", err);
-         return { success: false, message: "Gagal terhubung ke server. Periksa koneksi internet." };
-      });
+    // ==========================================
+    // 1. KONFIGURASI API & FETCH WRAPPER (ANTI HANG)
+    // ==========================================
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxnh4O8evA3h8tZI8zbdL73EECLKbt6UruTpWSygbhHA3MC-Qu0-6lcKyMQtHlmvqiB/exec'; // Pastikan URL Anda benar
+
+    async function gasApi(action, params = {}) {
+      // Buat controller untuk membatasi waktu loading (Timeout 15 detik)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); 
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          redirect: 'follow', 
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: action, ...params }),
+          signal: controller.signal // Pasang batas waktu
+        });
+
+        clearTimeout(timeoutId); // Hapus timer jika sukses sebelum 15 detik
+
+        if (!response.ok) throw new Error("Server mengembalikan error");
+        return await response.json();
+
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error("Fetch Error:", err);
+        
+        // Bedakan pesan error jika gagal karena internet atau karena server lama merespons
+        if (err.name === 'AbortError') {
+           return { success: false, message: "Koneksi lambat (Timeout). Server butuh waktu terlalu lama, coba lagi." };
+        }
+        return { success: false, message: "Jaringan terputus / Gagal terhubung ke server." };
+      }
     }
 
     // ==========================================
@@ -1373,12 +1385,25 @@
 
     function handleLogin(e) {
       e.preventDefault();
-      let tid = toastManager.show("Sedang masuk...");
+      
+      // Ambil tombol submit
+      const btnSubmit = document.querySelector('#formLogin button[type="submit"]');
+      btnSubmit.disabled = true; // Matikan tombol
+      btnSubmit.innerHTML = "MEMPROSES... <div class='loader !w-4 !h-4 !border-2 !border-t-white inline-block ml-2'></div>";
+      btnSubmit.classList.add('opacity-70', 'cursor-not-allowed');
+
+      let tid = toastManager.show("Sedang mencocokkan data...");
       const nip = document.getElementById('loginNip').value;
       const pass = document.getElementById('loginPass').value;
 
       gasApi('login', { nip: nip, password: pass }).then(res => {
         toastManager.finish(tid, res.success, res.message);
+        
+        // Nyalakan tombol lagi
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = "MASUK";
+        btnSubmit.classList.remove('opacity-70', 'cursor-not-allowed');
+
         if (res.success) {
           currentUser = res.user;
           localStorage.setItem('absensiUser', JSON.stringify(currentUser));
