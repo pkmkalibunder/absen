@@ -61,6 +61,34 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none"></div>
 
+  <!-- OVERLAY KATA SAPAAN POPUP (REVISI RESPONSIVE) -->
+  <div id="greetingOverlay" class="fixed inset-0 bg-black bg-opacity-70 z-[9999] flex flex-col items-center justify-center hidden-view backdrop-blur-sm transition-all duration-300 p-4">
+    
+    <!-- Kotak Popup (Lebar menyesuaikan, maksimal 90% tinggi layar HP agar tidak terpotong) -->
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm md:max-w-lg lg:max-w-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-500 flex flex-col max-h-[90dvh]" id="greetingBox">
+      
+      <!-- Gambar Banner (Tinggi membesar otomatis di PC) -->
+      <div class="h-48 md:h-64 lg:h-72 w-full bg-gray-200 relative flex-shrink-0">
+        <img id="greetImage" src="" class="w-full h-full object-cover">
+        <!-- Gradasi hitam yang lebih tebal agar tulisan selalu terbaca -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+        <h2 id="greetTitle" class="absolute bottom-4 md:bottom-6 left-6 right-6 text-2xl md:text-3xl lg:text-4xl font-extrabold text-white tracking-wide drop-shadow-lg leading-tight"></h2>
+      </div>
+      
+      <!-- Teks Kutipan (Bisa di-scroll jika kata mutiara dari admin sangat panjang) -->
+      <div class="p-6 md:p-8 text-center overflow-y-auto">
+        <i data-lucide="quote" class="w-8 h-8 md:w-10 md:h-10 text-blue-200 mx-auto mb-3 md:mb-4"></i>
+        <p id="greetMessage" class="text-gray-600 text-sm md:text-base lg:text-lg italic font-medium leading-relaxed mb-6 md:mb-8"></p>
+        
+        <!-- Tombol (Penuh di HP, pas di tengah pada PC) -->
+        <button onclick="closeGreeting()" class="bg-blue-600 text-white px-8 py-3 md:px-12 md:py-3.5 rounded-full font-bold shadow-md hover:bg-blue-700 transition transform hover:-translate-y-1 w-full sm:w-auto text-sm md:text-base">
+          Lanjut ke Aplikasi
+        </button>
+      </div>
+      
+    </div>
+  </div>
+
   <!-- OVERLAY LIVE CAMERA (UNTUK PC & HP) -->
     <div id="cameraLiveOverlay" class="fixed inset-0 bg-black z-[80] flex flex-col hidden-view">
       <div class="p-4 flex justify-between items-center bg-gray-900 text-white shadow-md">
@@ -1168,6 +1196,71 @@
            </div>
         </section>
 
+        <!-- SECTION ADMIN: KATA SAPAAN -->
+        <section id="secAdminSapaan" class="hidden-view space-y-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+               <div>
+                  <h2 class="text-xl font-bold text-gray-800">Pengaturan Kata Sapaan (Popup)</h2>
+                  <p class="text-xs text-gray-500 mt-1">Sesuaikan ucapan selamat dan kata mutiara yang akan dilihat karyawan.</p>
+               </div>
+               <button onclick="saveAdminSapaan()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 flex items-center gap-2 shadow-sm transition">
+                  <i data-lucide="save" class="w-4 h-4"></i> Simpan Sapaan
+               </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               <!-- Card: Sapaan Masuk -->
+               <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-center mb-3">
+                     <h3 class="font-bold text-blue-600 flex items-center gap-1"><i data-lucide="sunrise" class="w-4 h-4"></i> Sebelum Absen Datang</h3>
+                     <label class="flex items-center cursor-pointer">
+                       <input type="checkbox" id="sapAktifMasuk" class="sr-only peer">
+                       <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 relative"></div>
+                     </label>
+                  </div>
+                  <div class="space-y-3">
+                     <div><label class="text-xs font-bold text-gray-600">Judul Utama</label><input type="text" id="sapJudulMasuk" class="w-full p-2 text-sm border rounded"></div>
+                     <div><label class="text-xs font-bold text-gray-600">Kata Mutiara / Pesan</label><textarea id="sapPesanMasuk" rows="3" class="w-full p-2 text-sm border rounded resize-none"></textarea></div>
+                     <div><label class="text-xs font-bold text-gray-600">URL Gambar Banner</label><input type="text" id="sapGambarMasuk" class="w-full p-2 text-sm border rounded"></div>
+                  </div>
+               </div>
+
+               <!-- Card: Sapaan Pulang -->
+               <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-center mb-3">
+                     <h3 class="font-bold text-green-600 flex items-center gap-1"><i data-lucide="sunset" class="w-4 h-4"></i> Setelah Absen Pulang</h3>
+                     <label class="flex items-center cursor-pointer">
+                       <input type="checkbox" id="sapAktifPulang" class="sr-only peer">
+                       <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 relative"></div>
+                     </label>
+                  </div>
+                  <div class="space-y-3">
+                     <div><label class="text-xs font-bold text-gray-600">Judul Utama</label><input type="text" id="sapJudulPulang" class="w-full p-2 text-sm border rounded"></div>
+                     <div><label class="text-xs font-bold text-gray-600">Kata Mutiara / Pesan</label><textarea id="sapPesanPulang" rows="3" class="w-full p-2 text-sm border rounded resize-none"></textarea></div>
+                     <div><label class="text-xs font-bold text-gray-600">URL Gambar Banner</label><input type="text" id="sapGambarPulang" class="w-full p-2 text-sm border rounded"></div>
+                  </div>
+               </div>
+
+               <!-- Card: Sapaan Libur -->
+               <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-center mb-3">
+                     <h3 class="font-bold text-orange-500 flex items-center gap-1"><i data-lucide="coffee" class="w-4 h-4"></i> Jadwal Sedang Libur</h3>
+                     <label class="flex items-center cursor-pointer">
+                       <input type="checkbox" id="sapAktifLibur" class="sr-only peer">
+                       <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 relative"></div>
+                     </label>
+                  </div>
+                  <div class="space-y-3">
+                     <div><label class="text-xs font-bold text-gray-600">Judul Utama</label><input type="text" id="sapJudulLibur" class="w-full p-2 text-sm border rounded"></div>
+                     <div><label class="text-xs font-bold text-gray-600">Kata Mutiara / Pesan</label><textarea id="sapPesanLibur" rows="3" class="w-full p-2 text-sm border rounded resize-none"></textarea></div>
+                     <div><label class="text-xs font-bold text-gray-600">URL Gambar Banner</label><input type="text" id="sapGambarLibur" class="w-full p-2 text-sm border rounded"></div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </section>
+
         <!-- SECTION PROFIL -->
         <section id="secProfil" class="hidden-view space-y-6">
           <div class="bg-white p-6 rounded-xl shadow-sm max-w-2xl mx-auto">
@@ -1217,7 +1310,7 @@
     // ==========================================
     // 1. KONFIGURASI API & FETCH WRAPPER (ANTI HANG)
     // ==========================================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwV4rrnyOggb7uR1JqnGGG8MD3JMW7Q9m1WaytKg8OtVqEGTIft4KHh6uIWHQ2KEnhtKA/exec'; // Pastikan URL Anda benar
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwG7WeUnPAejF5slqZDDBpnCozIbbkfw520YwRu-Xn24xxLfj8Np3gJ-BOS1vdxCBwK/exec'; // Pastikan URL Anda benar
 
     async function gasApi(action, params = {}) {
       // Buat controller untuk membatasi waktu loading (Timeout 15 detik)
@@ -1432,7 +1525,8 @@
     }
 
     function showSection(secId) {
-      const sections = ['secKarBeranda', 'secKarKartu', 'secKarJadwal', 'secPengajuan', 'secScanner', 'secLaporan', 'secSetting', 'secAdminKaryawan', 'secAdminShift', 'secAdminJadwal', 'secAdminMonitor', 'secProfil', 'secKoorJadwal'];
+      const sections = ['secKarBeranda', 'secKarKartu', 'secKarJadwal', 'secPengajuan', 'secScanner', 'secLaporan', 'secSetting', 'secAdminKaryawan', 'secAdminShift', 'secAdminJadwal', 'secAdminMonitor', 'secProfil', 'secKoorJadwal', 'secAdminSapaan'];
+      
       sections.forEach(s => {
         const el = document.getElementById(s);
         if(el) el.classList.add('hidden-view');
@@ -1451,6 +1545,7 @@
       if(secId === 'secKoorJadwal') loadKoorJadwal();
       if(secId === 'secPengajuan') { loadRiwayatPengajuan(); checkStatusForPengajuan(); }
       if(secId === 'secSetting') loadSettingData();
+      if(secId === 'secAdminSapaan') loadAdminSapaan(); // TAMBAHAN INI
       if(secId === 'secAdminKaryawan') loadDataKaryawan();
       if(secId === 'secAdminShift') loadDataShift();
       if(secId === 'secAdminJadwal') switchAdminJadwalTab('Seting');
@@ -1581,6 +1676,7 @@
         nav.innerHTML += createMenu('clock', 'Setting Shift', 'secAdminShift');
         nav.innerHTML += createMenu('calendar', 'Setting Jadwal', 'secAdminJadwal');
         nav.innerHTML += createMenu('map-pin', 'Setting Lokasi', 'secSetting');
+        nav.innerHTML += createMenu('message-square', 'Kata Sapaan', 'secAdminSapaan'); // TAMBAHAN INI
         nav.innerHTML += createMenu('user', 'Profil', 'secProfil');
         
         let target = localStorage.getItem('activeSection') || 'secLaporan';
@@ -1718,6 +1814,7 @@
     // FUNGSI LOAD BERANDA UTAMA (1X API CALL)
     // ==========================================
     function loadStatusBeranda() {
+      // 1. Muat tabel bawah paralel (tanpa menunggu status)
       loadDaftarKehadiranHariIni(); 
       
       const badge = document.getElementById('statusAbsenBadge');
@@ -1726,9 +1823,13 @@
       badge.onclick = null;
       badge.title = "";
       
+      // Sembunyikan panel sebelum data termuat
       document.getElementById('panelKonfirmasi').classList.add('hidden-view');
       document.getElementById('panelPulang').classList.add('hidden-view');
-      document.getElementById('panelCatatanAdmin').classList.add('hidden-view'); // Sembunyikan notif saat loading
+      
+      const panelCatatan = document.getElementById('panelCatatanAdmin');
+      if (panelCatatan) panelCatatan.classList.add('hidden-view');
+      
       resetFotoKamera();
       
       if(document.getElementById('btnKonfirmasiMasuk')) document.getElementById('btnKonfirmasiMasuk').disabled = false;
@@ -1737,7 +1838,9 @@
       const tbody = document.getElementById('tbKehadiranHariIni');
       if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="p-4 text-center text-gray-500">Memuat data dari server... <div class="loader !w-3 !h-3 !border-2 !border-t-gray-500 inline-block ml-1"></div></td></tr>';
 
+      // 2. Tarik SEMUA data beranda dalam 1x API Call
       gasApi('getBerandaDataLengkap', { nip: currentUser.nip }).then(res => {
+          // --- PROTEKSI JARINGAN LAMBAT / ERROR ---
           if (!res || res.success === false) {
              badge.innerHTML = "<i data-lucide='wifi-off' class='w-4 h-4 inline-block mr-1 mb-0.5'></i> Jaringan Lambat";
              badge.className = "inline-block px-4 py-2 rounded-full text-white font-bold bg-red-500 cursor-pointer shadow-md hover:bg-red-600 transition";
@@ -1749,24 +1852,27 @@
              return;
           }
 
+          // 3. Render Tabel Bawah
           renderTabelKehadiranUI(res.kehadiran);
 
+          // 4. Proses Status Absen Utama
           let state = res.state;
           let status = state.status;
           isPengajuanLocked = state.isPengajuanLocked;
           badge.innerText = status;
 
-          // LOGIKA MENAMPILKAN KETERANGAN ADMIN
+          // --- LOGIKA MENAMPILKAN KETERANGAN ADMIN ---
           let ketAdmin = state.keteranganAdmin;
-          const panelCatatan = document.getElementById('panelCatatanAdmin');
-          // Filter agar keterangan default spt "Input Admin" atau kosong tidak memunculkan notif error
-          if (ketAdmin && ketAdmin.trim() !== '' && ketAdmin !== '-' && ketAdmin !== 'Input Admin') {
-              document.getElementById('txtCatatanAdmin').innerText = ketAdmin;
-              panelCatatan.classList.remove('hidden-view');
-          } else {
-              panelCatatan.classList.add('hidden-view');
+          if (panelCatatan) {
+              if (ketAdmin && ketAdmin.trim() !== '' && ketAdmin !== '-' && ketAdmin !== 'Input Admin') {
+                  document.getElementById('txtCatatanAdmin').innerText = ketAdmin;
+                  panelCatatan.classList.remove('hidden-view');
+              } else {
+                  panelCatatan.classList.add('hidden-view');
+              }
           }
           
+          // --- PENGATURAN UI PANEL KONFIRMASI / PULANG ---
           if(status === 'Belum Scan' || status === 'Belum Konfirmasi') {
               badge.className = "inline-block px-4 py-2 rounded-full text-white font-bold bg-gray-500";
           }
@@ -1793,6 +1899,7 @@
                      textShift = `<span class="text-red-600 font-bold">${textShift}</span><br><span class="text-[11px] text-red-500 mt-1 flex items-start gap-1"><i data-lucide="alert-circle" class="w-3 h-3 mt-0.5"></i> Ini adalah shift lintas hari yang belum diselesaikan (Checkout).</span>`;
                  }
                  
+                 // Pengaturan Tombol "Pulang Alasan Dinas"
                  if (status === 'Masuk') {
                      if (state.statusPulangDinas === 'Menunggu') {
                          document.getElementById('wrapTombolPulang').classList.add('hidden-view');
@@ -1801,17 +1908,75 @@
                      } else {
                          document.getElementById('wrapTombolPulang').classList.remove('hidden-view');
                          document.getElementById('msgPulangDinas').classList.add('hidden-view');
-                         if (state.statusPulangDinas === 'Ditolak' && document.getElementById('msgDitolakDinas')) document.getElementById('msgDitolakDinas').classList.remove('hidden-view');
-                         else if (document.getElementById('msgDitolakDinas')) document.getElementById('msgDitolakDinas').classList.add('hidden-view');
+                         if (state.statusPulangDinas === 'Ditolak' && document.getElementById('msgDitolakDinas')) {
+                             document.getElementById('msgDitolakDinas').classList.remove('hidden-view');
+                         } else if (document.getElementById('msgDitolakDinas')) {
+                             document.getElementById('msgDitolakDinas').classList.add('hidden-view');
+                         }
                      }
                  }
-            } else { currentActiveShiftDate = null; }
+            } else { 
+                currentActiveShiftDate = null; 
+            }
             
             if(document.getElementById('txtTanggalShift')) document.getElementById('txtTanggalShift').innerHTML = textShift;
             if(document.getElementById('txtTanggalShiftMasuk')) document.getElementById('txtTanggalShiftMasuk').innerHTML = textShift;
           }
           else if(status === 'Hadir') {
             badge.className = "inline-block px-4 py-2 rounded-full text-white font-bold bg-green-500";
+          }
+
+          // --- LOGIKA MENAMPILKAN KATA SAPAAN POPUP (ANTI-ERROR) ---
+          try {
+              if (res.greetings) {
+                 const now = new Date();
+                 // Format YYYY-MM-DD aman untuk semua browser
+                 const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; 
+                 
+                 let sapaanType = null;
+                 if (status === 'Belum Scan' || status === 'Belum Konfirmasi' || status === 'Pending') {
+                     sapaanType = 'masuk';
+                 } else if (status === 'Hadir') {
+                     sapaanType = 'pulang';
+                 } else if (status === 'Libur') {
+                     sapaanType = 'libur';
+                 }
+
+                 if (sapaanType && res.greetings[sapaanType] && res.greetings[sapaanType].aktif) {
+                     const cacheKey = `greet_${currentUser.nip}_${todayStr}_${sapaanType}`;
+                     
+                     // Jika belum dilihat hari ini untuk status tersebut
+                     if (!localStorage.getItem(cacheKey)) {
+                         const gData = res.greetings[sapaanType];
+                         
+                         const greetTitle = document.getElementById('greetTitle');
+                         const greetMsg = document.getElementById('greetMessage');
+                         const greetImg = document.getElementById('greetImage');
+                         const overlay = document.getElementById('greetingOverlay');
+                         const box = document.getElementById('greetingBox');
+
+                         // Pastikan elemen popup HTML ada di halaman
+                         if (greetTitle && greetMsg && overlay && box) {
+                             greetTitle.innerText = gData.judul || 'Hai!';
+                             greetMsg.innerText = gData.pesan || '';
+                             if (gData.gambar && greetImg) greetImg.src = gData.gambar;
+                             
+                             overlay.classList.remove('hidden-view');
+                             
+                             // Delay sebentar agar animasi scale CSS terlihat
+                             setTimeout(() => {
+                                 box.classList.remove('scale-95', 'opacity-0');
+                                 box.classList.add('scale-100', 'opacity-100');
+                             }, 50);
+
+                             // Tandai agar tidak muncul lagi hari ini
+                             localStorage.setItem(cacheKey, 'true');
+                         }
+                     }
+                 }
+              }
+          } catch (errPopup) {
+              console.error("Error ringan pada Popup Sapaan (Diabaikan):", errPopup);
           }
           
           lucide.createIcons();
@@ -4260,6 +4425,56 @@ function downloadJadwalExcel() {
 
         setTimeout(() => { toastManager.finish(tid, true, "Foto berhasil direkam!"); }, 500);
         closeLiveCamera();
+    }
+
+    function loadAdminSapaan() {
+       let tid = toastManager.show("Memuat data sapaan...");
+       gasApi('getGreetingsSettings').then(data => {
+          toastManager.finish(tid, true, "Selesai");
+          if (!data) return;
+          
+          ['masuk', 'pulang', 'libur'].forEach(tipe => {
+             let capTipe = tipe.charAt(0).toUpperCase() + tipe.slice(1);
+             if (data[tipe]) {
+                 document.getElementById('sapAktif' + capTipe).checked = data[tipe].aktif;
+                 document.getElementById('sapJudul' + capTipe).value = data[tipe].judul;
+                 document.getElementById('sapPesan' + capTipe).value = data[tipe].pesan;
+                 document.getElementById('sapGambar' + capTipe).value = data[tipe].gambar;
+             }
+          });
+       });
+    }
+
+    function saveAdminSapaan() {
+       let payload = {};
+       ['masuk', 'pulang', 'libur'].forEach(tipe => {
+           let capTipe = tipe.charAt(0).toUpperCase() + tipe.slice(1);
+           payload[tipe] = {
+               aktif: document.getElementById('sapAktif' + capTipe).checked,
+               judul: document.getElementById('sapJudul' + capTipe).value,
+               pesan: document.getElementById('sapPesan' + capTipe).value,
+               gambar: document.getElementById('sapGambar' + capTipe).value
+           };
+       });
+       
+       let tid = toastManager.show("Menyimpan Sapaan...");
+       gasApi('saveGreetingsSettings', { payload }).then(res => {
+          toastManager.finish(tid, res.success, res.message);
+       });
+    }
+
+    function closeGreeting() {
+       const overlay = document.getElementById('greetingOverlay');
+       const box = document.getElementById('greetingBox');
+       
+       // Animasi mengecil dan memudar
+       box.classList.remove('scale-100', 'opacity-100');
+       box.classList.add('scale-95', 'opacity-0');
+       
+       // Sembunyikan total setelah animasi selesai (300ms)
+       setTimeout(() => { 
+           overlay.classList.add('hidden-view'); 
+       }, 300);
     }
 </script>
 </body>
