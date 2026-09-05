@@ -61,6 +61,62 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none"></div>
 
+  <!-- OVERLAY MODAL EDIT KARYAWAN -->
+  <div id="modalEditKaryawan" class="fixed inset-0 bg-black bg-opacity-60 z-[999] flex items-center justify-center hidden-view backdrop-blur-sm transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0 duration-300 flex flex-col" id="boxEditKaryawan">
+      <div class="bg-blue-600 p-4 flex justify-between items-center">
+         <h3 class="text-white font-bold text-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-5 h-5"></i> Edit Karyawan</h3>
+         <button onclick="tutupEditKaryawan()" class="text-blue-200 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="editKarNipLama">
+        
+        <div>
+           <label class="block text-xs font-bold mb-1 text-gray-600">NIP / ID Karyawan</label>
+           <input type="text" id="editKarNip" class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+           <label class="block text-xs font-bold mb-1 text-gray-600">Nama Lengkap</label>
+           <input type="text" id="editKarNama" class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+           <div>
+              <label class="block text-xs font-bold mb-1 text-gray-600">Unit / Bagian</label>
+              <!-- Select Unit akan diisi otomatis lewat Javascript -->
+              <select id="editKarUnit" class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="Managemen">Karyawan</option>
+                <option value="Pendaftaran">Koordinator</option>
+                <option value="Poli">Scanner Khusus</option>
+                <option value="Perawat">Admin Utama</option>
+                <option value="Bidan">Admin Utama</option>
+                <option value="Bidan Desa">Admin Utama</option>
+                <option value="Farmasi">Admin Utama</option>
+                <option value="Laboratorium">Admin Utama</option>
+                <option value="Program">Admin Utama</option>
+              </select>
+           </div>
+           <div>
+              <label class="block text-xs font-bold mb-1 text-gray-600">Role Sistem</label>
+              <select id="editKarRole" class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                 <option value="Karyawan">Karyawan</option>
+                 <option value="Koordinator">Koordinator</option>
+                 <option value="Scanner">Scanner Khusus</option>
+                 <option value="Admin">Admin Utama</option>
+              </select>
+           </div>
+        </div>
+        <div>
+           <label class="block text-xs font-bold mb-1 text-gray-600">Password Baru <span class="text-[10px] font-normal text-red-400 italic">(Kosongkan jika tidak ingin diubah)</span></label>
+           <input type="text" id="editKarPass" class="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ketik sandi baru disini...">
+        </div>
+      </div>
+      <div class="p-4 bg-gray-50 border-t flex justify-end gap-3">
+         <button onclick="tutupEditKaryawan()" class="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition text-sm">Batal</button>
+         <button onclick="simpanEditKaryawan()" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md transition text-sm flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- OVERLAY KATA SAPAAN POPUP (REVISI RESPONSIVE) -->
   <div id="greetingOverlay" class="fixed inset-0 bg-black bg-opacity-70 z-[9999] flex flex-col items-center justify-center hidden-view backdrop-blur-sm transition-all duration-300 p-4">
     
@@ -1090,6 +1146,13 @@
                <div class="flex flex-wrap items-center mb-4 gap-2">
                   <select id="apprPerBulan" class="p-2 text-sm border rounded w-32"></select>
                   <input type="number" id="apprPerTahun" class="p-2 text-sm border rounded w-24">
+                  <!-- KOTAK PENCARIAN APPROVAL PERORANGAN -->
+                  <div class="relative ml-auto flex-grow max-w-sm">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                    <input type="text" id="cariApprPer" onkeyup="filterApprPerorangan()" class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm" placeholder="Cari Nama atau NIP...">
+                  </div>
                   <button onclick="loadApprovalJadwalPerorangan()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold shadow-sm transition">Tampilkan Pengajuan</button>
                </div>
                
@@ -1353,7 +1416,7 @@
     // ==========================================
     // 1. KONFIGURASI API & FETCH WRAPPER (ANTI HANG)
     // ==========================================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbylXguXtV6N4fQloOSU8S4ToVjEBMgl7vV_edEY993kXGaQhTOCCDH4SvcIoCzHfIXa8g/exec'; // Pastikan URL Anda benar
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwO7PNET7nYRTRRz_T-N7IvCYpeWagCFAtLqCxn9xTR5GSwRcJVlP_LbgbN_akzzZTuAg/exec'; // Pastikan URL Anda benar
 
     async function gasApi(action, params = {}) {
       // Buat controller untuk membatasi waktu loading (Timeout 15 detik)
@@ -3110,7 +3173,15 @@
       gasApi('getUsersAdmin').then(data => {
         toastManager.finish(tid, true, "Selesai");
         let htmlContent = '';
-        data.forEach(d => { htmlContent += `<tr><td class="p-2">${d.nip}</td><td class="p-2">${d.nama}</td><td class="p-2 font-bold">${d.role}</td><td class="p-2">${d.unit || '-'}</td><td class="p-2 text-center"><button onclick="hapusKaryawan('${d.nip}')" class="text-red-500 text-xs font-bold hover:underline">Hapus</button></td></tr>`; });
+        data.forEach(d => { htmlContent += `
+        <tr><td class="p-2">${d.nip}</td>
+        <td class="p-2">${d.nama}</td>
+        <td class="p-2 font-bold">${d.role}</td>
+        <td class="p-2">${d.unit || '-'}</td>
+        <td class="p-2 text-center">
+        <button onclick="hapusKaryawan('${d.nip}')" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] font-bold hover:bg-red-600 mr-1 shadow-sm">Hapus</button>
+        <button onclick="bukaEditKaryawan('${d.nip}', '${d.nama}', '${d.unit}', '${d.role}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-[10px] font-bold hover:bg-yellow-600 mr-1 shadow-sm">Edit</button>
+        </td></tr>`; });
         tb.innerHTML = htmlContent;
       });
     }
@@ -4577,6 +4648,100 @@ function downloadJadwalExcel() {
        setTimeout(() => { 
            overlay.classList.add('hidden-view'); 
        }, 300);
+    }
+
+    function bukaEditKaryawan(nip, nama, unit, role) {
+        document.getElementById('editKarNipLama').value = nip;
+        document.getElementById('editKarNip').value = nip;
+        document.getElementById('editKarNama').value = nama;
+        document.getElementById('editKarRole').value = role;
+        document.getElementById('editKarPass').value = ''; // Selalu dikosongkan demi keamanan visual
+        
+        // Tarik pilihan Unit dari dropdown yang sudah ada (Form Tambah Karyawan)
+        const selUnitEdit = document.getElementById('editKarUnit');
+        const selUnitAsli = document.getElementById('adKarUnit'); // Mengambil data dari form asli
+        
+        if (selUnitAsli) {
+            selUnitEdit.innerHTML = selUnitAsli.innerHTML;
+        } else {
+            selUnitEdit.innerHTML = `<option value="${unit}">${unit}</option>`;
+        }
+        selUnitEdit.value = unit;
+
+        // Munculkan Pop-up
+        const overlay = document.getElementById('modalEditKaryawan');
+        const box = document.getElementById('boxEditKaryawan');
+        overlay.classList.remove('hidden-view');
+        setTimeout(() => {
+            box.classList.remove('scale-95', 'opacity-0');
+            box.classList.add('scale-100', 'opacity-100');
+        }, 50);
+    }
+
+    function tutupEditKaryawan() {
+        const overlay = document.getElementById('modalEditKaryawan');
+        const box = document.getElementById('boxEditKaryawan');
+        box.classList.remove('scale-100', 'opacity-100');
+        box.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => overlay.classList.add('hidden-view'), 300);
+    }
+
+    function simpanEditKaryawan() {
+        let nipLama = document.getElementById('editKarNipLama').value;
+        let payload = {
+            nip: document.getElementById('editKarNip').value.trim(),
+            nama: document.getElementById('editKarNama').value.trim(),
+            unit: document.getElementById('editKarUnit').value,
+            role: document.getElementById('editKarRole').value,
+            pass: document.getElementById('editKarPass').value.trim()
+        };
+
+        if(!payload.nip || !payload.nama) return alert('NIP dan Nama Lengkap wajib diisi!');
+
+        let tid = toastManager.show("Menyimpan pembaruan...");
+        gasApi('editUserAdmin', { nipLama: nipLama, payload: payload }).then(res => {
+            toastManager.finish(tid, res.success, res.message);
+            if(res.success) {
+                tutupEditKaryawan();
+                // Reload data tabel karyawan
+                if (typeof loadAdminKaryawan === 'function') loadAdminKaryawan(); 
+            }
+        });
+    }
+
+    // ==========================================
+    // PENCARIAN APPROVAL PERORANGAN (REAL-TIME)
+    // ==========================================
+    function filterApprPerorangan() {
+        const input = document.getElementById("cariApprPer");
+        const filter = input.value.toLowerCase();
+        const tbody = document.getElementById("tbAdminApprPerorangan");
+        
+        // Jika tabel belum ada atau sedang loading, hentikan
+        if (!tbody) return; 
+        
+        const tr = tbody.getElementsByTagName("tr");
+
+        for (let i = 0; i < tr.length; i++) {
+            // Abaikan baris "Tidak ada pengajuan" atau pesan loading
+            if (tr[i].getElementsByTagName("td").length < 4) continue;
+
+            // Kolom 0 = Nama, Kolom 1 = NIP
+            let tdNama = tr[i].getElementsByTagName("td")[0];
+            let tdNip = tr[i].getElementsByTagName("td")[1];
+            
+            if (tdNama || tdNip) {
+                let txtValueNama = tdNama.textContent || tdNama.innerText;
+                let txtValueNip = tdNip.textContent || tdNip.innerText;
+                
+                // Jika nama atau NIP cocok dengan ketikan
+                if (txtValueNama.toLowerCase().indexOf(filter) > -1 || txtValueNip.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = ""; // Tampilkan
+                } else {
+                    tr[i].style.display = "none"; // Sembunyikan
+                }
+            }
+        }
     }
 </script>
 </body>
