@@ -494,6 +494,60 @@
           </div>
           <!-- AKHIR NOTIFIKASI -->
 
+          <!-- KARTU REKAPAN BULAN BERJALAN -->
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+              <h3 class="font-bold text-gray-800 mb-4 text-sm flex items-center gap-1"><i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i> Rekap Absensi Bulan Ini</h3>
+              
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- Total Hari Kerja -->
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-inner">
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Hari Kerja</div>
+                    <div class="text-2xl font-black text-gray-800" id="rekHariKerja">0</div>
+                </div>
+                
+                <!-- Hadir & DL -->
+                <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div class="text-[10px] text-green-700 font-bold uppercase tracking-wide">Hadir & D.Luar</div>
+                    <div class="text-2xl font-black text-green-600" id="rekHadir">0</div>
+                </div>
+                
+                <!-- Masuk (Lupa Pulang) -->
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <div class="text-[10px] text-blue-700 font-bold uppercase tracking-wide">Lupa Pulang</div>
+                    <div class="text-2xl font-black text-blue-600" id="rekMasuk">0</div>
+                </div>
+                
+                <!-- Izin -->
+                <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <div class="text-[10px] text-yellow-700 font-bold uppercase tracking-wide">Izin / Cuti</div>
+                    <div class="text-2xl font-black text-yellow-600" id="rekIzin">0</div>
+                </div>
+                
+                <!-- Sakit -->
+                <div class="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                    <div class="text-[10px] text-orange-700 font-bold uppercase tracking-wide">Sakit</div>
+                    <div class="text-2xl font-black text-orange-600" id="rekSakit">0</div>
+                </div>
+                
+                <!-- Alpa -->
+                <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+                    <div class="text-[10px] text-red-700 font-bold uppercase tracking-wide">Alpa / Mangkir</div>
+                    <div class="text-2xl font-black text-red-600" id="rekAlpa">0</div>
+                </div>
+              </div>
+              
+              <!-- Progress Bar Persentase -->
+              <div class="mt-5 pt-4 border-t border-gray-100">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold text-gray-600">Persentase Kehadiran (Hadir / Hari Kerja)</span>
+                    <span class="text-sm font-black text-blue-600" id="rekPersenTxt">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                    <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000 w-0" id="rekPersenBar"></div>
+                </div>
+              </div>
+          </div>
+
           <!-- Daftar Kehadiran Hari Ini -->
           <div class="bg-white p-6 rounded-xl shadow-sm">
             <div class="flex justify-between items-center mb-4">
@@ -1416,7 +1470,7 @@
     // ==========================================
     // 1. KONFIGURASI API & FETCH WRAPPER (ANTI HANG)
     // ==========================================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwO7PNET7nYRTRRz_T-N7IvCYpeWagCFAtLqCxn9xTR5GSwRcJVlP_LbgbN_akzzZTuAg/exec'; // Pastikan URL Anda benar
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxOa8xwWbIDiTQN0oeAFDyObIQ3YW7fs_9oi-jaZv5fwD0J_PcY9j9qY_KqBuhf6c0FxQ/exec'; // Pastikan URL Anda benar
 
     async function gasApi(action, params = {}) {
       // Buat controller untuk membatasi waktu loading (Timeout 15 detik)
@@ -1915,7 +1969,7 @@
             else btnPulang.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }
-
+    
     // ==========================================
     // FUNGSI LOAD BERANDA UTAMA (1X API CALL)
     // ==========================================
@@ -1960,7 +2014,10 @@
 
           // 3. Render Tabel Bawah
           renderTabelKehadiranUI(res.kehadiran);
-
+          
+          // Panggil API Rekapan Bulan Ini
+          loadRekapanPribadiBulanIni();
+          
           // 4. Proses Status Absen Utama
           let state = res.state;
           let status = state.status;
@@ -4742,6 +4799,40 @@ function downloadJadwalExcel() {
                 }
             }
         }
+    }
+
+    function loadRekapanPribadiBulanIni() {
+        if(!currentUser || !currentUser.nip) return;
+        
+        gasApi('getRekapBulanIni', { nip: currentUser.nip }).then(res => {
+            if(res.success && res.data) {
+                let d = res.data;
+                let persen = d.hKerja > 0 ? Math.round((d.hHadir / d.hKerja) * 100) : 0;
+                if (persen > 100) persen = 100;
+                
+                if(document.getElementById('rekHariKerja')) {
+                    document.getElementById('rekHariKerja').innerText = d.hKerja;
+                    document.getElementById('rekHadir').innerText = d.hHadir;
+                    document.getElementById('rekIzin').innerText = d.hIzin;
+                    document.getElementById('rekSakit').innerText = d.hSakit;
+                    document.getElementById('rekAlpa').innerText = d.hAlpa;
+                    document.getElementById('rekMasuk').innerText = d.hMasuk;
+                    
+                    document.getElementById('rekPersenTxt').innerText = persen + '%';
+                    let pBar = document.getElementById('rekPersenBar');
+                    pBar.style.width = persen + '%';
+                    
+                    if (persen >= 90) pBar.className = "bg-green-500 h-2.5 rounded-full transition-all duration-1000";
+                    else if (persen >= 75) pBar.className = "bg-blue-500 h-2.5 rounded-full transition-all duration-1000";
+                    else if (persen >= 50) pBar.className = "bg-yellow-400 h-2.5 rounded-full transition-all duration-1000";
+                    else pBar.className = "bg-red-500 h-2.5 rounded-full transition-all duration-1000";
+                }
+            } else {
+                console.error("Gagal memuat rekap matriks: ", res.message);
+            }
+        }).catch(err => {
+            console.error("Terjadi kegagalan koneksi API Rekap: ", err);
+        });
     }
 </script>
 </body>
