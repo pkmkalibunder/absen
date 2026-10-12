@@ -748,47 +748,63 @@
           </div>
         </section>
 
-        <!-- SECTION KOORDINATOR JADWAL UNIT -->
+        <!-- SECTION KOORDINATOR JADWAL UNIT & KESELURUHAN -->
         <section id="secKoorJadwal" class="hidden-view space-y-6">
-          <div class="bg-white p-6 rounded-xl shadow-sm">
-            <h2 class="text-xl font-bold mb-4">Setting Jadwal Unit: <span id="koorUnitTxt" class="text-blue-600"></span></h2>
-            <div class="flex flex-wrap gap-4 items-end mb-4 border-b pb-4">
-              <div>
-                <label class="block text-sm font-bold mb-1">Bulan</label>
-                <select id="koorJadBulan" class="p-2 border rounded w-32"></select>
-              </div>
-              <div>
-                <label class="block text-sm font-bold mb-1">Tahun</label>
-                <input type="number" id="koorJadTahun" class="p-2 border rounded w-24">
-              </div>
-              <button onclick="loadKoorJadwal()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 shadow-sm transition">Tampilkan Jadwal Unit</button>
-              
-              <!-- TOMBOL SIMPAN SAJA (TANPA PENGAJUAN) -->
-              <button onclick="simpanKoorJadwal()" class="bg-indigo-600 text-white px-4 py-2 rounded font-bold hover:bg-indigo-700 hidden-view shadow-sm transition flex items-center gap-2" id="btnSimpanKoorJadwal">
-                 <i data-lucide="save" class="w-4 h-4"></i> Simpan Data (Draft)
-              </button>
-            </div>
-            
-            <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col md:flex-row items-start justify-between gap-2">
-                <div>
-                   <span class="text-sm font-bold text-gray-700 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> Petunjuk:</span>
-                   <p class="ml-5 text-xs text-gray-600 mt-1">Klik <b>Simpan Data</b> untuk menyimpan tanpa mengirimkan ke Admin. <br>Klik tombol <b>Ajukan</b> pada baris karyawan untuk menyerahkan jadwal tersebut agar disetujui Admin.</p>
-                </div>
-            </div>
+		  <div class="bg-white p-6 rounded-xl shadow-sm">
+			<div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+			  <h2 class="text-xl font-bold">Setting & View Jadwal Unit: <span id="koorUnitTxt" class="text-blue-600"></span></h2>
+			  <!-- TAB / MODE PILIHAN VIEW JADWAL -->
+			  <div class="flex border rounded-lg overflow-hidden bg-gray-100 p-1 gap-1">
+				<button onclick="switchKoorJadwalMode('Unit')" id="btnKoorModeUnit" class="px-3 py-1.5 text-xs font-bold rounded-md bg-white text-blue-600 shadow-sm transition">Jadwal Unit</button>
+				<button onclick="switchKoorJadwalMode('Keseluruhan')" id="btnKoorModeKeseluruhan" class="px-3 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-blue-600 transition">Jadwal Keseluruhan</button>
+			  </div>
+			</div>
 
-            <div class="max-h-[65vh] overflow-auto relative border border-gray-300 rounded-lg shadow-inner bg-white">
-              <table class="w-full text-xs border-collapse" id="tblKoorJadwalUI">
-                <thead class="sticky top-0 z-30 bg-gray-200 shadow-sm" id="thKoorJadwal"></thead>
-                <tbody id="tbKoorJadwal" class="divide-y divide-gray-200"></tbody>
-              </table>
-            </div>
+			<div class="flex flex-wrap gap-4 items-end mb-4 border-b pb-4">
+			  <div>
+				<label class="block text-sm font-bold mb-1">Bulan</label>
+				<select id="koorJadBulan" class="p-2 border rounded w-32 bg-white"></select>
+			  </div>
+			  <div>
+				<label class="block text-sm font-bold mb-1">Tahun</label>
+				<input type="number" id="koorJadTahun" class="p-2 border rounded w-24 bg-white">
+			  </div>
+			  
+			  <button onclick="loadKoorJadwal()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 shadow-sm transition flex items-center gap-1">
+				<i data-lucide="search" class="w-4 h-4"></i> Tampilkan Jadwal
+			  </button>
 
-            <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
-               <h3 class="font-bold text-sm text-blue-800 mb-2">Keterangan Kode Shift:</h3>
-               <div id="ketShiftKoor" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs text-gray-700"></div>
-            </div>
-          </div>
-        </section>
+			  <!-- TOMBOL DOWNLOAD JADWAL EXCEL FOR KOORDINATOR -->
+			  <button onclick="downloadKoorJadwalExcel()" class="bg-indigo-600 text-white px-4 py-2 rounded font-bold hover:bg-indigo-700 shadow-sm transition flex items-center gap-2" id="btnDownloadKoorJadwal">
+				<i data-lucide="download" class="w-4 h-4"></i> Download Jadwal
+			  </button>
+			  
+			  <!-- TOMBOL SIMPAN SAJA (DRAFT) -->
+			  <button onclick="simpanKoorJadwal()" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 hidden-view shadow-sm transition flex items-center gap-2" id="btnSimpanKoorJadwal">
+				<i data-lucide="save" class="w-4 h-4"></i> Simpan Data (Draft)
+			  </button>
+			</div>
+			
+			<div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col md:flex-row items-start justify-between gap-2" id="infoKoorPetunjuk">
+				<div>
+				   <span class="text-sm font-bold text-gray-700 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> Petunjuk:</span>
+				   <p class="ml-5 text-xs text-gray-600 mt-1">Klik <b>Simpan Data</b> untuk menyimpan tanpa mengirimkan ke Admin. <br>Klik tombol <b>Ajukan</b> pada baris karyawan untuk menyerahkan jadwal tersebut agar disetujui Admin.</p>
+				</div>
+			</div>
+
+			<div class="max-h-[65vh] overflow-auto relative border border-gray-300 rounded-lg shadow-inner bg-white">
+			  <table class="w-full text-xs border-collapse" id="tblKoorJadwalUI">
+				<thead class="sticky top-0 z-30 bg-gray-200 shadow-sm" id="thKoorJadwal"></thead>
+				<tbody id="tbKoorJadwal" class="divide-y divide-gray-200"></tbody>
+			  </table>
+			</div>
+
+			<div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
+			   <h3 class="font-bold text-sm text-blue-800 mb-2">Keterangan Kode Shift:</h3>
+			   <div id="ketShiftKoor" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs text-gray-700"></div>
+			</div>
+		  </div>
+		</section>
 
         <!-- SECTION PENGAJUAN (Bisa Approval untuk Kepegawaian/Kepala/Admin) -->
         <section id="secPengajuan" class="hidden-view space-y-6">
@@ -4834,6 +4850,198 @@ function downloadJadwalExcel() {
             console.error("Terjadi kegagalan koneksi API Rekap: ", err);
         });
     }
+	
+	// Variable Mode Jadwal Koordinator (Unit / Keseluruhan)
+	let currentKoorJadwalMode = 'Unit'; 
+
+	// 1. Fungsi Switch Mode Jadwal
+	function switchKoorJadwalMode(mode) {
+		currentKoorJadwalMode = mode;
+		const btnUnit = document.getElementById('btnKoorModeUnit');
+		const btnKes = document.getElementById('btnKoorModeKeseluruhan');
+		const infoPetunjuk = document.getElementById('infoKoorPetunjuk');
+		const btnSimpan = document.getElementById('btnSimpanKoorJadwal');
+
+		if (mode === 'Unit') {
+			btnUnit.className = "px-3 py-1.5 text-xs font-bold rounded-md bg-white text-blue-600 shadow-sm transition";
+			btnKes.className = "px-3 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-blue-600 transition";
+			if(infoPetunjuk) infoPetunjuk.classList.remove('hidden-view');
+			if(btnSimpan) btnSimpan.classList.remove('hidden-view');
+		} else {
+			btnKes.className = "px-3 py-1.5 text-xs font-bold rounded-md bg-white text-blue-600 shadow-sm transition";
+			btnUnit.className = "px-3 py-1.5 text-xs font-bold rounded-md text-gray-600 hover:text-blue-600 transition";
+			if(infoPetunjuk) infoPetunjuk.classList.add('hidden-view');
+			if(btnSimpan) btnSimpan.classList.add('hidden-view');
+		}
+
+		loadKoorJadwal();
+	}
+
+	// 2. Perbarui Fungsi loadKoorJadwal agar Mendukung Mode Keseluruhan
+	function loadKoorJadwal() {
+	   if(!currentUser || currentUser.role !== 'Koordinator') return;
+	   
+	   const bln = parseInt(document.getElementById('koorJadBulan').value);
+	   const thn = parseInt(document.getElementById('koorJadTahun').value);
+
+	   if (currentKoorJadwalMode === 'Keseluruhan') {
+		   document.getElementById('koorUnitTxt').innerText = "Keseluruhan Puskesmas";
+		   let tid = toastManager.show("Memuat Jadwal Keseluruhan...");
+		   
+		   gasApi('getJadwalBulan', { bln, thn }).then(res => {
+			  listKoorKaryawanGlobal = res.users || []; 
+			  globalKoorJadwalBulanData = res.jadwal || [];
+			  renderKoorJadwalKeseluruhanTable();
+			  
+			  const ketContainer = document.getElementById('ketShiftKoor');
+			  if(ketContainer && res.shifts) {
+				 if(res.shifts.length === 0) ketContainer.innerHTML = '<span class="text-gray-500 col-span-full">Belum ada data shift yang diatur.</span>';
+				 else ketContainer.innerHTML = res.shifts.map(s => `<div class="bg-white p-2 rounded border border-blue-200 shadow-sm"><span class="font-bold text-blue-600">${s.kode}</span><br> <span class="text-gray-600">${s.jm} - ${s.jp}</span> ${s.lintas === 'Ya' ? '<span class="text-red-500 font-bold ml-1" title="Lintas Hari">(+1 Hari)</span>' : ''}</div>`).join('');
+			  }
+			  toastManager.finish(tid, true, "Jadwal Keseluruhan dimuat");
+		   });
+	   } else {
+		   document.getElementById('koorUnitTxt').innerText = currentUser.unit || 'Unit Belum Diset';
+		   if(!currentUser.unit) { 
+			   document.getElementById('tbKoorJadwal').innerHTML = '<tr><td colspan="35" class="p-4 text-center text-red-500">Anda belum diset ke dalam Unit manapun. Silahkan lapor ke Admin.</td></tr>'; 
+			   return; 
+		   }
+
+		   let tid = toastManager.show("Memuat Jadwal Unit...");
+		   gasApi('getJadwalUnitKoor', { bln, thn, unit: currentUser.unit }).then(res => {
+			  listKoorKaryawanGlobal = res.users || []; 
+			  globalKoorJadwalBulanData = res.jadwal || [];
+			  document.getElementById('btnSimpanKoorJadwal').classList.remove('hidden-view');
+			  
+			  renderKoorJadwalTable();
+			  
+			  const ketContainer = document.getElementById('ketShiftKoor');
+			  if(ketContainer && res.shifts) {
+				 if(res.shifts.length === 0) ketContainer.innerHTML = '<span class="text-gray-500 col-span-full">Belum ada data shift yang diatur.</span>';
+				 else ketContainer.innerHTML = res.shifts.map(s => `<div class="bg-white p-2 rounded border border-blue-200 shadow-sm"><span class="font-bold text-blue-600">${s.kode}</span><br> <span class="text-gray-600">${s.jm} - ${s.jp}</span> ${s.lintas === 'Ya' ? '<span class="text-red-500 font-bold ml-1" title="Lintas Hari">(+1 Hari)</span>' : ''}</div>`).join('');
+			  }
+			  toastManager.finish(tid, true, "Selesai dimuat");
+		   });
+	   }
+	}
+
+	// 3. Render Tabel Jadwal Keseluruhan (Read-Only)
+	function renderKoorJadwalKeseluruhanTable() {
+		const bln = parseInt(document.getElementById('koorJadBulan').value);
+		const thn = parseInt(document.getElementById('koorJadTahun').value);
+		const jHari = new Date(thn, bln, 0).getDate();
+
+		let headHTML = `<tr>
+		  <th class="p-2 border border-gray-300 text-left whitespace-nowrap sticky left-0 z-40 bg-gray-200 shadow-sm" rowspan="2">Nama Karyawan</th>
+		  <th class="p-2 border border-gray-300 text-center min-w-[100px] bg-gray-200" rowspan="2">Unit / Bagian</th>`;
+		for(let i=1; i<=jHari; i++) headHTML += `<th class="p-1 border border-gray-300 min-w-[35px] text-center bg-gray-200">${i}</th>`;
+		headHTML += `</tr><tr>`;
+		for(let i=1; i<=jHari; i++) {
+		  const hari = getNamaHari(i, bln, thn);
+		  const color = hari === 'Min' ? 'text-red-500' : 'text-gray-600';
+		  headHTML += `<th class="p-1 border border-gray-300 bg-gray-50 text-center text-[10px] ${color}">${hari}</th>`;
+		}
+		headHTML += `</tr>`;
+		document.getElementById('thKoorJadwal').innerHTML = headHTML;
+
+		const bHtml = listKoorKaryawanGlobal.map(u => {
+			let jRow = globalKoorJadwalBulanData.find(x => x.nip === u.nip) || { dates: {} };
+			let r = `<tr class="group hover:bg-gray-100">
+			   <td class="p-2 border border-gray-300 whitespace-nowrap text-sm sticky left-0 z-20 bg-white group-hover:bg-gray-100 font-bold text-gray-800">${u.nama}<br><span class="text-[10px] text-gray-500 font-normal">${u.nip}</span></td>
+			   <td class="p-2 border border-gray-300 text-xs text-center font-semibold text-blue-600 bg-gray-50">${u.unit || '-'}</td>`;
+			
+			for(let i=1; i<=jHari; i++) {
+			  let val = jRow.dates[i] || '-';
+			  let bgClass = (val === '-' || val === '') ? 'text-gray-300' : 'text-gray-800 font-bold bg-blue-50';
+			  r += `<td class="p-1 border border-gray-300 text-center text-xs uppercase ${bgClass}">${val}</td>`;
+			}
+			r += `</tr>`;
+			return r;
+		}).join('');
+
+		if(listKoorKaryawanGlobal.length === 0) document.getElementById('tbKoorJadwal').innerHTML = `<tr><td colspan="${jHari+2}" class="p-4 text-center text-gray-500">Tidak ada data jadwal keseluruhan.</td></tr>`;
+		else document.getElementById('tbKoorJadwal').innerHTML = bHtml;
+		lucide.createIcons();
+	}
+
+	// 4. Fitur Download Jadwal Excel untuk Koordinator
+	function downloadKoorJadwalExcel() {
+	  if (!listKoorKaryawanGlobal || listKoorKaryawanGlobal.length === 0) {
+		return alert("Silahkan tampilkan data jadwal terlebih dahulu sebelum mendownload!");
+	  }
+
+	  let tid = toastManager.show("Mengekspor Jadwal ke Excel...");
+
+	  setTimeout(() => {
+		const bln = parseInt(document.getElementById('koorJadBulan').value);
+		const thn = parseInt(document.getElementById('koorJadTahun').value);
+		const blnTxt = document.getElementById('koorJadBulan').options[document.getElementById('koorJadBulan').selectedIndex].text;
+		const jHari = new Date(thn, bln, 0).getDate();
+		const modeTxt = currentKoorJadwalMode === 'Keseluruhan' ? 'Keseluruhan' : `Unit_${currentUser.unit || 'Unit'}`;
+		const title = `Jadwal_Shift_${modeTxt}_${blnTxt}_${thn}.xlsx`;
+
+		const wb = XLSX.utils.book_new();
+
+		let ws_data = [
+		  [{ v: `JADWAL SHIFT KARYAWAN (${currentKoorJadwalMode.toUpperCase()})`, t: 's', s: { font: { bold: true, sz: 14 }, alignment: { horizontal: "center", vertical: "center" } } }],
+		  [{ v: `Periode: ${blnTxt} ${thn}`, t: 's', s: { font: { bold: true, sz: 12 }, alignment: { horizontal: "center", vertical: "center" } } }],
+		  []
+		];
+
+		let header_r1 = ["No", "Nama", "NIK / NIP", "Unit"];
+		let header_r2 = ["", "", "", ""];
+		
+		for(let i = 1; i <= jHari; i++) {
+			header_r1.push(i.toString());
+			header_r2.push(getNamaHari(i, bln, thn));
+		}
+
+		ws_data.push(header_r1.map(h => ({ v: h, t: 's', s: { font: { bold: true }, border: getBorderStyle(), alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "F3F4F6" } } } })));
+		
+		ws_data.push(header_r2.map((h, idx) => {
+			let color = (h === 'Min') ? "EF4444" : "4B5563"; 
+			let fill = { fgColor: { rgb: "F9FAFB" } };
+			if (idx < 4) { fill = { fgColor: { rgb: "F3F4F6" } }; color = "000000"; }
+			return { v: h, t: 's', s: { font: { sz: 9, color: {rgb: color} }, border: getBorderStyle(), alignment: { horizontal: "center", vertical: "center" }, fill: fill } };
+		}));
+
+		listKoorKaryawanGlobal.forEach((u, index) => {
+		   let jRow = globalKoorJadwalBulanData.find(x => x.nip === u.nip) || { dates: {} };
+		   let rData = [];
+		   
+		   rData.push({ v: index + 1, t: 'n', s: { border: getBorderStyle(), alignment: { horizontal: "center", vertical: "center" } } });
+		   rData.push({ v: u.nama, t: 's', s: { border: getBorderStyle(), alignment: { vertical: "center" } } });
+		   rData.push({ v: "'" + u.nip, t: 's', s: { border: getBorderStyle(), alignment: { vertical: "center" } } });
+		   rData.push({ v: u.unit || '-', t: 's', s: { border: getBorderStyle(), alignment: { horizontal: "center", vertical: "center" } } });
+
+		   for(let i = 1; i <= jHari; i++) {
+			  let val = jRow.dates[i] || '-';
+			  rData.push({ v: val, t: 's', s: { border: getBorderStyle(), alignment: { horizontal: "center", vertical: "center" } } });
+		   }
+		   ws_data.push(rData);
+		});
+
+		let ws = XLSX.utils.aoa_to_sheet(ws_data);
+		
+		ws['!merges'] = [
+		  { s: { r: 0, c: 0 }, e: { r: 0, c: header_r1.length - 1 } },
+		  { s: { r: 1, c: 0 }, e: { r: 1, c: header_r1.length - 1 } },
+		  { s: { r: 3, c: 0 }, e: { r: 4, c: 0 } },
+		  { s: { r: 3, c: 1 }, e: { r: 4, c: 1 } },
+		  { s: { r: 3, c: 2 }, e: { r: 4, c: 2 } },
+		  { s: { r: 3, c: 3 }, e: { r: 4, c: 3 } }
+		];
+
+		let ws_cols = [{ wch: 5 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
+		for(let i = 1; i <= jHari; i++) ws_cols.push({ wch: 5 });
+		ws['!cols'] = ws_cols;
+
+		XLSX.utils.book_append_sheet(wb, ws, "Jadwal Shift");
+		XLSX.writeFile(wb, title);
+
+		toastManager.finish(tid, true, "Berhasil di-download");
+	  }, 100);
+	}
 </script>
 </body>
 </html>
